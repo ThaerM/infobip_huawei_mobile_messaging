@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://developer.huawei.com/repo/" }
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://developer.huawei.com/repo/" }
+    }
+}
+
+rootProject.name = "infobip_huawei_mobile_messaging"

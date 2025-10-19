@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">YourApp</string>
+    <string name="app_id">YOUR_HUAWEI_APP_ID</string>
+    <string name="infobip_application_code">YOUR_INFOBIP_APP_CODE</string>
+</resources>

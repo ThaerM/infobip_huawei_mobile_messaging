@@ -1,0 +1,82 @@
+group = "com.tms.infobip.huawei.infobip_huawei_mobile_messaging"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.1.0"
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://developer.huawei.com/repo/" }
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("com.huawei.agconnect:agcp:1.9.1.303")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://developer.huawei.com/repo/" }
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "com.huawei.agconnect"
+apply plugin: "maven-publish"
+
+dependencies {
+    // Pin exact version for reproducibility:
+    implementation('com.infobip:infobip-mobile-messaging-huawei-sdk:8.5.1@aar') { transitive = true }
+    // Inbox add-on for Huawei (optional; we include so apps get it for free)
+    implementation('com.infobip:infobip-mobile-messaging-huawei-inbox-sdk:8.5.1@aar') { transitive = true }
+    // Local broadcasts are used by the SDK’s samples/wiki (AndroidX core ships it)
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://developer.huawei.com/repo/" }
+}
+
+android {
+    namespace = "com.tms.infobip.huawei.infobip_huawei_mobile_messaging"
+
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 24
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+}
