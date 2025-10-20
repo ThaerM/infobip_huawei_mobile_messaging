@@ -11,10 +11,18 @@ void main() {
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
-      if (call.method == 'initialize') return true;
-      if (call.method == 'setUserIdentity') return true;
-      if (call.method == 'setTags') return true;
-      return null;
+      switch (call.method) {
+        case 'initialize':
+        case 'setUserIdentity':
+        case 'setTags':
+        case 'enableInAppMessages':
+        case 'syncInbox':
+        case 'getInbox':
+        case 'markInboxSeen':
+          return true;
+        default:
+          return null;
+      }
     });
   });
 
@@ -25,18 +33,30 @@ void main() {
 
   test('initialize() returns true', () async {
     final api = InfobipHuaweiMobileMessaging.instance;
-    final ok = await api.initialize(
-      applicationCode: 'dummy',
-      huaweiAppId: 'dummy',
-    );
+    final ok = await api.initialize();
     expect(ok, isTrue);
   });
 
   test('setUserIdentity() completes', () async {
     final api = InfobipHuaweiMobileMessaging.instance;
     expect(
-      api.setUserIdentity('test_user', attributes: {'age': 30}),
+      api.setUserIdentity(
+        externalUserId: 'test_user',
+        attributes: {'age': 30},
+      ),
       completes,
     );
+  });
+
+  test('enableInAppMessages() returns true', () async {
+    final api = InfobipHuaweiMobileMessaging.instance;
+    final ok = await api.enableInAppMessages(true);
+    expect(ok, isTrue);
+  });
+
+  test('setTags() returns true', () async {
+    final api = InfobipHuaweiMobileMessaging.instance;
+    final ok = await api.setTags(['vip', 'tester']);
+    expect(ok, isTrue);
   });
 }

@@ -139,11 +139,22 @@ class InfobipHuaweiMobileMessagingPlugin :
         }
         when (call.method) {
             "initialize" -> {
-                ensureReceiversRegistered()
-                // The Huawei SDK reads strings.xml: app_id & infobip_application_code.
-                // It only needs a simple Builder().build() per README.
-                MobileMessaging.Builder(ctx.applicationContext as Application).build()
-                result.success(true)
+                    ensureReceiversRegistered()
+                    val ctx = appContext!!
+                    val hmsAvailable = try {
+                        val code = com.huawei.hms.api.HuaweiApiAvailability.getInstance()
+                            .isHuaweiMobileServicesAvailable(ctx)
+                        code == com.huawei.hms.api.ConnectionResult.SUCCESS
+                    } catch (_: Throwable) { false }
+
+                    if (!hmsAvailable) {
+                        // Skip push init on non-HMS devices; still return success so the app runs
+                        result.success(true)
+                        return
+                    }
+
+                    MobileMessaging.Builder(ctx.applicationContext as Application).build()
+                    result.success(true)
             }
             "getToken" -> {
                 // The token is exposed via TOKEN_RECEIVED event.
@@ -299,6 +310,37 @@ class InfobipHuaweiMobileMessagingPlugin :
                     "Client-side delete is not available in Huawei Inbox SDK; delete via server API.",
                     null
                 )
+            }
+            "diagnose" -> {
+                val ctx = appContext!!
+                val map = hashMapOf<String, Any?>()
+                try {
+                    val hmsAvail = com.huawei.hms.api.HuaweiApiAvailability.getInstance()
+                        .isHuaweiMobileServicesAvailable(ctx)
+                    map["hmsStatus"] = hmsAvail // 0 == SUCCESS
+                } catch (t: Throwable) {
+                    map["hmsStatus"] = -1
+                    map["hmsError"] = t.message
+                }
+                // Check HMS Core / Huawei ID packages
+                fun installed(pkg: String): Boolean = try {
+                    ctx.packageManager.getPackageInfo(pkg, 0); true
+                } catch (_: Exception) { false }
+
+                map["hasHuaweiID"] = installed("com.huawei.hwid")   // Huawei ID / HMS Core
+                map["hasHMS"]      = installed("com.huawei.hms")    // Some devices use this
+
+                // Check strings
+                val appId = try { ctx.getString(
+                    ctx.resources.getIdentifier("app_id","string", ctx.packageName)
+                ) } catch (_: Exception) { "" }
+                val infobipCode = try { ctx.getString(
+                    ctx.resources.getIdentifier("infobip_application_code","string", ctx.packageName)
+                ) } catch (_: Exception) { "" }
+                map["appIdPresent"] = appId.isNotEmpty()
+                map["infobipCodePresent"] = infobipCode.isNotEmpty()
+
+                result.success(map)
             }
             else -> result.notImplemented()
         }

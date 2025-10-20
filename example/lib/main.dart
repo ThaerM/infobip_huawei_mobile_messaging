@@ -3,6 +3,7 @@ import 'dart:developer';
 
 // import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:infobip_huawei_mobile_messaging/infobip_huawei_mobile_messaging.dart';
 import 'package:infobip_huawei_mobile_messaging_example/inbox_page.dart';
 // import 'package:permission_handler/permission_handler.dart';
@@ -31,7 +32,29 @@ void main() async {
     }
   });
 
-  await sdk.initialize(applicationCode: '', huaweiAppId: '');
+  try {
+    final ok = await sdk.initialize();
+    if (!ok) {
+      await _toast(
+        'Init failed: check agconnect-services.json and strings.xml',
+      );
+    }
+
+    final info = await InfobipHuaweiMobileMessaging.instance.diagnose();
+    final hmsOk = (info['hmsStatus'] == 0);
+    final hasAgc = info['appIdPresent'] == true;
+
+    if (!hmsOk) {
+      await _toast(
+        'HMS Core not available. Use a Huawei device/emulator with AppGallery.',
+      );
+    }
+    if (!hasAgc) {
+      await _toast('Missing agconnect-services.json / app_id in strings.xml.');
+    }
+  } catch (e) {
+    await _toast('Init error: agconnect-services.json or strings.xml missing');
+  }
   runApp(const App());
 }
 
@@ -43,6 +66,15 @@ void main() async {
 //     }
 //   }
 // }
+
+Future<void> _toast(String msg) async {
+  try {
+    await Fluttertoast.showToast(msg: msg);
+  } catch (_) {
+    // Fallback if toast plugin isn't available on some platform
+    // ignore: use_build_context_synchronously
+  }
+}
 
 Uri? _extractDeeplink(String? customPayload) {
   if (customPayload == null || customPayload.isEmpty) return null;
@@ -76,10 +108,12 @@ class App extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  await InfobipHuaweiMobileMessaging.instance.setUserIdentity(
-                    'user-123',
-                    attributes: {'loyal': true},
-                  );
+                  final ok = await InfobipHuaweiMobileMessaging.instance
+                      .setUserIdentity(
+                        externalUserId: 'user-123',
+                        attributes: {'loyal': true},
+                      );
+                  await _toast(ok ? 'Identity set' : 'Failed to set identity');
                 },
                 child: const Text('Set identity'),
               ),
@@ -94,16 +128,34 @@ class App extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  await InfobipHuaweiMobileMessaging.instance.syncInbox();
-                  final list = await InfobipHuaweiMobileMessaging.instance
-                      .getInbox();
-                  log('INBOX: $list');
+                  try {
+                    final payload = await InfobipHuaweiMobileMessaging.instance
+                        .syncInbox(
+                          externalUserId: 'user-123',
+                          // accessToken: '<JWT here>' // for production; leave null for sandbox
+                        );
+                    final inbox = await InfobipHuaweiMobileMessaging.instance
+                        .getInbox(externalUserId: 'user-123');
+                    log('INBOX: $inbox');
+                    await _toast(
+                      'Inbox synced: total=${payload['countTotal']}, unread=${payload['countUnread']}',
+                    );
+                  } catch (e) {
+                    await _toast('Inbox error: $e');
+                  }
                 },
                 child: const Text('Sync Inbox'),
               ),
               ElevatedButton(
-                onPressed: () => InfobipHuaweiMobileMessaging.instance
-                    .enableInAppMessages(true),
+                onPressed: () async {
+                  final ok = await InfobipHuaweiMobileMessaging.instance
+                      .enableInAppMessages(true);
+                  await _toast(
+                    ok
+                        ? 'In‑App enabled'
+                        : 'In‑App not supported in this build',
+                  );
+                },
                 child: const Text('Enable In-App'),
               ),
               ElevatedButton(

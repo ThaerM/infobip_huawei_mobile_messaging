@@ -14,6 +14,7 @@ class InboxPage extends StatefulWidget {
 
 class _InboxPageState extends State<InboxPage> {
   final _mm = InfobipHuaweiMobileMessaging.instance;
+  final String _externalUserId = 'user-123';
   List<InboxMessage> _messages = [];
   bool _loading = false;
 
@@ -26,26 +27,59 @@ class _InboxPageState extends State<InboxPage> {
   Future<void> _loadInbox() async {
     setState(() => _loading = true);
     try {
-      await _mm.syncInbox();
-      final raw = await _mm.getInbox();
+      final _ = await _mm.syncInbox(
+        externalUserId: _externalUserId,
+        // accessToken: '<JWT for production>'
+      );
+      final fetched = await _mm.getInbox(externalUserId: _externalUserId);
+      final list = List<Map<String, dynamic>>.from(
+        (fetched['messages'] as List?) ?? const <Map<String, dynamic>>[],
+      );
       setState(() {
-        _messages = raw.map(InboxMessage.fromMap).toList();
+        _messages = list.map(InboxMessage.fromMap).toList();
       });
     } catch (e) {
       log('Inbox error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Inbox error: $e')));
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _markSeen(String id) async {
-    await _mm.markInboxSeen(id);
-    _loadInbox();
+    try {
+      await _mm.markInboxSeen(
+        externalUserId: _externalUserId,
+        messageIds: [id],
+      );
+      await _loadInbox();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Mark seen failed: $e')));
+      }
+    }
   }
 
   Future<void> _delete(String id) async {
-    await _mm.deleteInboxMessage(id);
-    _loadInbox();
+    try {
+      await _mm.deleteInboxMessage(id);
+    } catch (_) {
+      // ignore – native returns an error by design on Huawei
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Delete is not supported on Huawei client SDK'),
+        ),
+      );
+    }
+    await _loadInbox();
   }
 
   @override
