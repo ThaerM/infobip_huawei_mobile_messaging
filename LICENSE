@@ -1,14 +1,22 @@
-Where the README references come from:
- Huawei codelab for AG Connect plugin/JSON,
-  Infobip profile docs, In-App minimum versions,
-   and Inbox docs/artifacts.
-     [oai_citation:8‡developer.huawei.com](https://developer.huawei.com/consumer/en/codelab/HMSPushKit/index.html)
+# Infobip Huawei Mobile Messaging Plugin
+
+A Flutter plugin for integrating the **Infobip Mobile Messaging Huawei SDK** — enabling push notifications, inbox, and in‑app messaging for Huawei devices.
 
 ---
 
-# 6) Pub.dev metadata (ready to paste)
+## Reference & Documentation
 
-`pubspec.yaml` additions:
+This plugin is based on the following references:
+- Huawei codelab for AG Connect & Push Kit JSON setup
+  [https://developer.huawei.com/consumer/en/codelab/HMSPushKit/index.html](https://developer.huawei.com/consumer/en/codelab/HMSPushKit/index.html)
+- Infobip Mobile Messaging profile & In-App SDK documentation
+- Huawei Inbox SDK artifacts and Infobip integration guidelines
+
+---
+
+## Pub.dev Metadata
+
+Paste this block into your `pubspec.yaml` before publishing:
 
 ```yaml
 repository: https://github.com/yourorg/infobip_huawei_mobile_messaging
@@ -22,14 +30,26 @@ topics:
 screenshots:
   - description: "Huawei push, in-app, and inbox"
     path: example/screenshots/huawei_push_inbox.png
+```
 
+---
+
+## License
 
 Apache License 2.0
 
-Copyright 2025 Thaer Mosa
+```
+Copyright (C) 2025 Thaer Mosa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
-You may obtain a copy at
+You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
