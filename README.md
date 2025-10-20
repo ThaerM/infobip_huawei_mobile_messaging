@@ -27,8 +27,9 @@ It enables seamless integration of **Huawei Push Notifications**, **Inbox**, **I
   ```
 - Your app’s `strings.xml` must include:
   ```xml
-  <string name="app_id">YOUR_HUAWEI_APP_ID</string>
-  <string name="infobip_application_code">YOUR_INFOBIP_APP_CODE</string>
+    <string name="app_name">YourApp</string>
+    <string name="app_id">YOUR_HUAWEI_APP_ID</string>
+    <string name="infobip_application_code">YOUR_INFOBIP_APP_CODE</string>
   ```
 - A valid **Infobip Mobile Application Profile** with Huawei push enabled.
 
@@ -40,7 +41,8 @@ Add the dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  infobip_huawei_mobile_messaging: ^0.1.0
+  infobip_huawei_mobile_messaging: 
+     path: ./infobip_huawei_mobile_messaging
 ```
 
 Then run:
@@ -157,4 +159,6 @@ flutter run
 ## 📄 License
 
 MIT License © 2025 Infobip Flutter Integration Community
-Thaer Mousa - Software Engineer
+
+Thaer Mosa - Software Engineer
+Thaer.mosa13@gmail.com
