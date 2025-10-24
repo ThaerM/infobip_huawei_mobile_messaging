@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names
 import 'dart:async';
 
 import 'package:infobip_huawei_mobile_messaging/infobip_huawei_mobile_messaging.dart'
